@@ -1,4 +1,3 @@
-const e = require('express');
 const {logevents} = require('./logger');
 
 const errorHandler = async (err, req, res, next) => {

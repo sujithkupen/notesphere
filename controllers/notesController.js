@@ -57,7 +57,7 @@ const updateNote = asyncHandler(async (req, res) => {
   const duplicate = await Note.findOne({ title }).lean().exec();
 
   if (duplicate && duplicate?._id.toString() !== id) {
-    return res.status(409).json({ message: "Duplicate note title" });
+    return res.status(409).json({ message: "Duplicate note detected" });
   }
 
   note.user = user;

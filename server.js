@@ -11,7 +11,9 @@ const corsOptions = require('./config/corsOptions');
 const connectDB = require('./config/dbConn');
 const mongoose = require("mongoose");
 const {logEvents} = require('./middleware/logger');
+
 connectDB();
+
 app.use(cors(corsOptions));
 app.use(logger);
 app.use(cookieParser());

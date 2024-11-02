@@ -5,7 +5,7 @@ const loginLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 5,
   message: {
-    message: "Too many login attempts",
+    message: "Too many login attempts detected, try again later!",
   },
   handler: (req, res, next, options) => {
     logEvents(
@@ -14,7 +14,7 @@ const loginLimiter = rateLimit({
     );
     res.status(options.statusCode).send(options.message);
   },
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  standardHeaders: true, 
   legacyHeaders: false,
 });
 

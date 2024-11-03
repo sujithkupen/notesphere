@@ -1,13 +1,15 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const asyncHandler = require("express-async-handler");
 
-const login = asyncHandler(async (req, res) => {
+// @desc Login
+// @route POST /auth
+// @access Public
+const login = async (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
-    return res.status(400).json({ message: "All fields are required" });
+    return res.status(400).json({ message: "Username and password required" });
   }
 
   const foundUser = await User.findOne({ username }).exec();
@@ -28,25 +30,28 @@ const login = asyncHandler(async (req, res) => {
       },
     },
     process.env.ACCESS_TOKEN_SECRET,
-    { expiresIn: "15s" }
+    { expiresIn: "15m" }
   );
 
   const refreshToken = jwt.sign(
     { username: foundUser.username },
     process.env.REFRESH_TOKEN_SECRET,
-    { expiresIn: "20s" }
+    { expiresIn: "7d" }
   );
 
   res.cookie("jwt", refreshToken, {
-    httpOnly: true,
+    httpOnly: true, 
     secure: true,
     sameSite: "None",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
   res.json({ accessToken });
-});
+};
 
+// @desc Refresh
+// @route GET /auth/refresh
+// @access Public
 const refresh = (req, res) => {
   const cookies = req.cookies;
 
@@ -57,7 +62,7 @@ const refresh = (req, res) => {
   jwt.verify(
     refreshToken,
     process.env.REFRESH_TOKEN_SECRET,
-    asyncHandler(async (err, decoded) => {
+    async (err, decoded) => {
       if (err) return res.status(403).json({ message: "Forbidden" });
 
       const foundUser = await User.findOne({
@@ -74,14 +79,17 @@ const refresh = (req, res) => {
           },
         },
         process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: "15s" }
+        { expiresIn: "15m" }
       );
 
       res.json({ accessToken });
-    })
+    }
   );
 };
 
+// @desc Logout
+// @route POST /auth/logout
+// @access Public
 const logout = (req, res) => {
   const cookies = req.cookies;
   if (!cookies?.jwt) return res.sendStatus(204);
